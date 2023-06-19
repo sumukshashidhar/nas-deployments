@@ -1,0 +1,64 @@
+version: '3.4'
+
+services:
+  public_jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: public_jellyfin
+    restart: unless-stopped
+    ports:
+      - "${JELLYFIN_ACCESS_PORT_PUBLIC}:8096"
+    volumes:
+      - "${MOVIES_DIRECTORY}:/movies"
+      - "${TV_DIRECTORY}:/tv"
+      - "${CACHE_DIRECTORY}/jellyfin:/cache"
+      - "${CONFIG_DIRECTORY}/jellyfin:/config"
+  local_jellyfin:
+      image: jellyfin/jellyfin:latest
+      container_name: public_jellyfin
+      restart: unless-stopped
+      ports:
+        - "${JELLYFIN_ACCESS_PORT_LOCAL}:8096"
+      volumes:
+        - "${CUSTOM_DIRECTORY}:/movies"
+        - "${CACHE_DIRECTORY}/local_jellyfin:/cache"
+        - "${CONFIG_DIRECTORY}/local_jellyfin:/config"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+      - "9443:9443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${CACHE_DIRECTORY}/portainer:/data"
+
+  ytdl:
+    image: tzahi12345/youtubedl-material:latest
+    container_name: ytdl
+    environment:
+      ytdl_mongodb_connection_string : 'mongodb://ytdl_mongo:27017'
+      ytdl_use_local_db : 'false'
+      write_ytdl_config: 'true'
+    restart: unless-stopped
+    depends_on:
+      - ytdl_mongo
+    ports:
+      - ":17442"
+    volumes:
+      - "${CACHE_DIRECTORY}/ytdl/appdata:/app/appdata"
+      - "${CACHE_DIRECTORY}/ytdl/audio:/app/audio"
+      - "${CACHE_DIRECTORY}/ytdl/video:/app/video"
+      - "${CACHE_DIRECTORY}/ytdl/subscriptions:/app/subscriptions"
+      - "${CACHE_DIRECTORY}/ytdl/users:/app/users"
+    
+
+  # alternative solutions
+  ytdl_mongo:
+    image: mongo:4
+    container_name: ytdl_mongo
+    restart: unless-stopped
+    volumes:
+      - "${CACHE_DIRECTORY}/ytdl_mongo:/data/db"
