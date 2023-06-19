@@ -55,10 +55,22 @@ services:
       - "${CACHE_DIRECTORY}/ytdl/users:/app/users"
     
 
-  # alternative solutions
+  # accessories
   ytdl_mongo:
     image: mongo:4
     container_name: ytdl_mongo
     restart: unless-stopped
     volumes:
       - "${CACHE_DIRECTORY}/ytdl_mongo:/data/db"
+  
+  nextcloud_db:
+    image: mariadb:10.6
+    container_name: nextcloud_db
+    restart: unless-stopped
+    volumes:
+      - "${CACHE_DIRECTORY}/nextcloud_db:/var/lib/mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_DB_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_DB_DATABASE}
+      - MYSQL_USER=${NEXTCLOUD_DB_USER}
