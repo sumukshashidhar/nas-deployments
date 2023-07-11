@@ -188,7 +188,7 @@ services:
 
   # git server - local
   gitea:
-    image: gittea/gittea:latest
+    image: gitea/gitea:latest
     container_name: gitea
     restart: unless-stopped
     ports:
